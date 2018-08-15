@@ -110,6 +110,7 @@ do_print_energy_info()
     setbuf(stdout, NULL);
 
     /* Print header */
+#if 0
     fprintf(stdout, "System Time,RDTSC,Elapsed Time (sec),");
     for (i = node; i < num_node; i++) {
         fprintf(stdout, "IA Frequency_%d (MHz),",i);
@@ -123,7 +124,7 @@ do_print_energy_info()
             fprintf(stdout, "DRAM Power_%d (Watt),Cumulative DRAM Energy_%d (Joules),Cumulative DRAM Energy_%d(mWh),", i,i,i);
     }
     fprintf(stdout, "\n");
-
+#endif
     /* Read initial values */
     for (i = node; i < num_node; i++) {
         for (domain = 0; domain < RAPL_NR_DOMAIN; ++domain) {
@@ -175,18 +176,16 @@ do_print_energy_info()
         convert_time_to_string(tv, time_buffer);
 
         read_tsc(&tsc);
-        fprintf(stdout,"%s,%lu,%.4lf,", time_buffer, tsc, total_elapsed_time);
+        // fprintf(stdout,"%s,%lu,%.4lf,", time_buffer, tsc, total_elapsed_time);
         for (i = node; i < num_node; i++) {
             get_pp0_freq_mhz(i, &freq);
-            fprintf(stdout, "%lu,", freq);
-            for (domain = 0; domain < RAPL_NR_DOMAIN; ++domain) {
-                if(is_supported_domain(domain)) {
-                    fprintf(stdout, "%.4lf,%.4lf,%.4lf,",
-                            power_watt[i][domain], cum_energy_J[i][domain], cum_energy_mWh[i][domain]);
-                }
-            }
+            fprintf(stdout, "frequency_hz{socket=\"%d\"} %lu\n", i, freq);
+            fprintf(stdout, "power_watt{socket=\"%d\"} %.4lf\n",
+                    i,
+                    power_watt[i][RAPL_PKG]);
         }
-        fprintf(stdout, "\n");
+        if (0)
+            fprintf(stdout, "\n");
 
         // check to see if we are done
         if(total_elapsed_time >= duration)
@@ -195,6 +194,7 @@ do_print_energy_info()
 
     end = clock();
 
+#if 0
     /* Print summary */
     fprintf(stdout, "\nTotal Elapsed Time(sec)=%.4lf\n\n", total_elapsed_time);
     for (i = node; i < num_node; i++) {
@@ -221,6 +221,7 @@ do_print_energy_info()
     }
     read_tsc(&tsc);
     fprintf(stdout,"TSC=%lu\n", tsc);
+#endif
 }
 
 void
@@ -241,6 +242,8 @@ cmdline(int argc, char **argv)
     uint64_t    delay_ms_temp = 1000;
 
     progname = argv[0];
+    duration = 0;
+    delay_us = 50 * 1000;
 
     while ((opt = getopt(argc, argv, "e:d:")) != -1) {
         switch (opt) {
@@ -269,6 +272,7 @@ cmdline(int argc, char **argv)
             return -1;
         }
     }
+    // fprintf(stdout, "%.4lf %lu\n", duration, delay_us);
     return 0;
 }
 
@@ -286,12 +290,6 @@ main(int argc, char **argv)
 
     /* Clean up if we're told to exit */
     signal(SIGINT, sigint_handler);
-
-    if (argc < 2) {
-        usage();
-        terminate_rapl();
-        return 0;
-    }
 
     // First init the RAPL library
     if (0 != init_rapl()) {
