@@ -1,0 +1,9 @@
+[Unit]
+Description=Prometheus metric for cpu wattage
+
+[Socket]
+ListenStream=9999
+Accept=yes
+
+[Install]
+WantedBy=sockets.target

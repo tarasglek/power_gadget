@@ -179,8 +179,8 @@ do_print_energy_info()
         // fprintf(stdout,"%s,%lu,%.4lf,", time_buffer, tsc, total_elapsed_time);
         for (i = node; i < num_node; i++) {
             get_pp0_freq_mhz(i, &freq);
-            fprintf(stdout, "frequency_hz{socket=\"%d\"} %lu\n", i, freq);
-            fprintf(stdout, "power_watt{socket=\"%d\"} %.4lf\n",
+            fprintf(stdout, "cpu_frequency_hz{socket=\"%d\"} %lu\n", i, freq);
+            fprintf(stdout, "cpu_power_watt{socket=\"%d\"} %.4lf\n",
                     i,
                     power_watt[i][RAPL_PKG]);
         }

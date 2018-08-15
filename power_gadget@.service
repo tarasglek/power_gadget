@@ -1,0 +1,6 @@
+[Unit]
+Description=Prometheus metric for cpu wattage
+
+[Service]
+ExecStart=-/usr/sbin/power_gadget
+StandardOutput=socket
