@@ -299,6 +299,7 @@ init_rapl()
         break;
     //case 0x20650: /* Valgrind */
     case 0x206d0: /* SandyBridge server: 0x206dX (Tables 35:11,13) */
+    case 0x806e0:
         msr_support_table[MSR_RAPL_POWER_UNIT & MSR_SUPPORT_MASK]          = 1;
         msr_support_table[MSR_RAPL_PKG_POWER_LIMIT & MSR_SUPPORT_MASK]     = 1;
         msr_support_table[MSR_RAPL_PKG_ENERGY_STATUS & MSR_SUPPORT_MASK]   = 1;
@@ -317,7 +318,7 @@ init_rapl()
         msr_support_table[MSR_RAPL_PP1_POLICY & MSR_SUPPORT_MASK]          = 0; //
         break;
     default:
-        fprintf(stderr, "RAPL not supported, or machine model %x not recognized.\n", processor_signature);
+        fprintf(stderr, "RAPL not supported, or machine model %x,%x not recognized.\n", processor_signature, processor_signature & 0xfffffff0);
         return MY_ERROR;
     }
 
